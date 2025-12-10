@@ -1,0 +1,17 @@
+{
+  "name": "graymode",
+  "version": "1.0.0",
+  "description": "Focus better by turning distracting sites grayscale",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js --watch",
+    "zip": "cd dist && zip -r ../graymode.zip ."
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.260",
+    "esbuild": "^0.24.0",
+    "sharp": "^0.34.5",
+    "typescript": "^5.3.0"
+  }
+}

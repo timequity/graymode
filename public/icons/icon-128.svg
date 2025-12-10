@@ -1,0 +1,48 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Main gradient: green to gray transition -->
+    <linearGradient id="grayFade128" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4CAF50"/>
+      <stop offset="30%" stop-color="#66BB6A"/>
+      <stop offset="55%" stop-color="#90A4AE"/>
+      <stop offset="80%" stop-color="#607D8B"/>
+      <stop offset="100%" stop-color="#37474F"/>
+    </linearGradient>
+    <!-- Subtle inner glow -->
+    <radialGradient id="innerGlow128" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Shadow filter -->
+    <filter id="dropShadow128" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    <!-- Iris texture gradient -->
+    <radialGradient id="irisGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#546E7A"/>
+      <stop offset="70%" stop-color="#37474F"/>
+      <stop offset="100%" stop-color="#263238"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Main circle with gradient (iris) -->
+  <circle cx="64" cy="64" r="58" fill="url(#grayFade128)" filter="url(#dropShadow128)"/>
+
+  <!-- Subtle ring detail -->
+  <circle cx="64" cy="64" r="54" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.2"/>
+
+  <!-- Inner glow overlay -->
+  <circle cx="64" cy="64" r="58" fill="url(#innerGlow128)"/>
+
+  <!-- Pupil (dark center) -->
+  <circle cx="64" cy="64" r="26" fill="#1a1a1a"/>
+  <circle cx="64" cy="64" r="24" fill="url(#irisGradient)"/>
+  <circle cx="64" cy="64" r="14" fill="#0d0d0d"/>
+
+  <!-- Light reflection (gives life to the eye) -->
+  <ellipse cx="56" cy="56" rx="8" ry="6" fill="#ffffff" opacity="0.85"/>
+  <circle cx="74" cy="72" r="3" fill="#ffffff" opacity="0.4"/>
+
+  <!-- Subtle bottom highlight -->
+  <ellipse cx="64" cy="78" rx="12" ry="4" fill="#ffffff" opacity="0.08"/>
+</svg>
