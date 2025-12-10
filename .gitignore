@@ -1,0 +1,18 @@
+# Build
+dist/
+node_modules/
+*.zip
+
+# Secrets
+.env
+api_keys.js
+config.local.ts
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Extension artifacts
+*.crx
+*.pem
