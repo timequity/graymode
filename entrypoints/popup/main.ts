@@ -5,6 +5,7 @@ const MAX_BLACKLIST_FREE = 5;
 
 let settings: Settings = DEFAULT_SETTINGS;
 let currentHostname: string = '';
+let currentTabId: number | null = null;
 
 // DOM elements
 const enabledCheckbox = document.getElementById('enabled') as HTMLInputElement;
@@ -32,12 +33,28 @@ async function init() {
 async function getCurrentTab() {
   try {
     const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-    if (tab?.url) {
+    if (tab?.url && tab.id) {
       const url = new URL(tab.url);
       currentHostname = url.hostname.replace(/^www\./, '');
+      currentTabId = tab.id;
     }
   } catch (e) {
     currentHostname = '';
+    currentTabId = null;
+  }
+}
+
+// Notify current tab to apply changes immediately
+async function notifyCurrentTab() {
+  if (currentTabId) {
+    try {
+      await browser.tabs.sendMessage(currentTabId, {
+        type: 'APPLY_SETTINGS',
+        settings
+      });
+    } catch (e) {
+      // Tab might not have content script loaded
+    }
   }
 }
 
@@ -114,6 +131,7 @@ function setupListeners() {
     settings.enabled = enabledCheckbox.checked;
     await saveSettings(settings);
     updateStatus();
+    notifyCurrentTab();
   });
 
   // Intensity
@@ -124,6 +142,7 @@ function setupListeners() {
   intensitySlider.addEventListener('change', async () => {
     settings.intensity = Number(intensitySlider.value);
     await saveSettings(settings);
+    notifyCurrentTab();
   });
 
   // Presets
@@ -137,6 +156,7 @@ function setupListeners() {
       }
       await saveSettings(settings);
       updateStatus();
+      notifyCurrentTab();
     });
   });
 
@@ -148,6 +168,7 @@ function setupListeners() {
         await saveSettings(settings);
         renderBlacklist();
         updateStatus();
+        notifyCurrentTab();
       }
     }
   });
@@ -163,6 +184,7 @@ function setupListeners() {
         await saveSettings(settings);
         renderBlacklist();
         updateStatus();
+        notifyCurrentTab();
         newSiteInput.value = '';
       }
     }
@@ -183,6 +205,7 @@ function setupListeners() {
       await saveSettings(settings);
       renderBlacklist();
       updateStatus();
+      notifyCurrentTab();
     }
   });
 }

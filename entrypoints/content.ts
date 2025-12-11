@@ -1,15 +1,13 @@
-import { isDistractingSite, Settings } from '@/utils/presets';
-import { settingsStorage } from '@/utils/storage';
+import { isDistractingSite, Settings, DEFAULT_SETTINGS } from '@/utils/presets';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_start',
 
   main() {
-    let currentSettings: Settings | null = null;
+    const hostname = window.location.hostname;
 
     function applyGrayscale(settings: Settings) {
-      const hostname = window.location.hostname;
       const isDistracting = isDistractingSite(hostname, settings);
 
       if (settings.enabled && isDistracting) {
@@ -19,22 +17,23 @@ export default defineContentScript({
       }
     }
 
-    // Check site and apply on load
-    browser.runtime.sendMessage({
-      type: 'CHECK_SITE',
-      hostname: window.location.hostname
-    }).then((response) => {
-      if (response) {
-        currentSettings = response.settings;
-        applyGrayscale(response.settings);
+    // Load settings and apply on start
+    browser.storage.sync.get(['settings']).then((result) => {
+      const settings = result.settings ?? DEFAULT_SETTINGS;
+      applyGrayscale(settings);
+    });
+
+    // Listen for settings changes from storage
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area === 'sync' && changes.settings?.newValue) {
+        applyGrayscale(changes.settings.newValue);
       }
     });
 
-    // Watch for settings changes
-    settingsStorage.watch((newSettings) => {
-      if (newSettings) {
-        currentSettings = newSettings;
-        applyGrayscale(newSettings);
+    // Listen for direct messages from popup (instant apply)
+    browser.runtime.onMessage.addListener((message) => {
+      if (message.type === 'APPLY_SETTINGS' && message.settings) {
+        applyGrayscale(message.settings);
       }
     });
   },
