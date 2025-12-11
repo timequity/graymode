@@ -1,3 +1,5 @@
+import { hostnameMatches } from './types';
+
 // Preset categories for distracting sites
 export const PRESETS = {
   social: {
@@ -61,15 +63,17 @@ export const DEFAULT_SETTINGS: Settings = {
 };
 
 export function isDistractingSite(hostname: string, settings: Settings): boolean {
-  // Check custom blacklist
-  if (settings.customBlacklist.some(site => hostname.includes(site))) {
+  const normalizedHostname = hostname.toLowerCase().replace(/^www\./, '');
+
+  // Check custom blacklist (exact or subdomain match)
+  if (settings.customBlacklist.some((site) => hostnameMatches(normalizedHostname, site))) {
     return true;
   }
 
   // Check enabled presets
   for (const presetKey of settings.enabledPresets) {
     const preset = PRESETS[presetKey];
-    if (preset.sites.some(site => hostname.includes(site))) {
+    if (preset.sites.some((site) => hostnameMatches(normalizedHostname, site))) {
       return true;
     }
   }
