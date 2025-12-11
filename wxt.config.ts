@@ -5,7 +5,7 @@ export default defineConfig({
     name: 'GrayMode',
     version: '1.0.0',
     description: 'Focus better by turning distracting sites grayscale',
-    permissions: ['storage', 'activeTab'],
+    permissions: ['storage', 'activeTab', 'tabs'],
     host_permissions: ['<all_urls>'],
     icons: {
       16: 'icons/icon-16.png',

@@ -1,9 +1,10 @@
-import { Settings, PresetKey, DEFAULT_SETTINGS } from '@/utils/presets';
+import { Settings, PresetKey, DEFAULT_SETTINGS, isDistractingSite } from '@/utils/presets';
 import { loadSettings, saveSettings } from '@/utils/storage';
 
 const MAX_BLACKLIST_FREE = 5;
 
 let settings: Settings = DEFAULT_SETTINGS;
+let currentHostname: string = '';
 
 // DOM elements
 const enabledCheckbox = document.getElementById('enabled') as HTMLInputElement;
@@ -13,14 +14,61 @@ const blacklistItems = document.getElementById('blacklist-items') as HTMLDivElem
 const blacklistCount = document.getElementById('blacklist-count') as HTMLSpanElement;
 const newSiteInput = document.getElementById('new-site') as HTMLInputElement;
 const addSiteButton = document.getElementById('add-site') as HTMLButtonElement;
+const statusBar = document.getElementById('status-bar') as HTMLDivElement;
+const statusText = document.getElementById('status-text') as HTMLSpanElement;
+const addCurrentButton = document.getElementById('add-current') as HTMLButtonElement;
+const currentSiteName = document.getElementById('current-site-name') as HTMLSpanElement;
 
 // Preset checkboxes
 const presetCheckboxes = document.querySelectorAll<HTMLInputElement>('[data-preset]');
 
 async function init() {
   settings = await loadSettings();
+  await getCurrentTab();
   render();
   setupListeners();
+}
+
+async function getCurrentTab() {
+  try {
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    if (tab?.url) {
+      const url = new URL(tab.url);
+      currentHostname = url.hostname.replace(/^www\./, '');
+    }
+  } catch (e) {
+    currentHostname = '';
+  }
+}
+
+function updateStatus() {
+  if (!currentHostname || currentHostname.startsWith('chrome') || currentHostname.startsWith('about')) {
+    statusText.textContent = 'Browser page';
+    statusBar.classList.remove('active');
+    addCurrentButton.style.display = 'none';
+    return;
+  }
+
+  const isFiltering = settings.enabled && isDistractingSite(currentHostname, settings);
+
+  if (isFiltering) {
+    statusText.textContent = `Filtering ${currentHostname}`;
+    statusBar.classList.add('active');
+    addCurrentButton.style.display = 'none';
+  } else {
+    statusText.textContent = `Not filtered: ${currentHostname}`;
+    statusBar.classList.remove('active');
+
+    // Show "Add current site" button if not already in blacklist and has room
+    const canAdd = !settings.customBlacklist.includes(currentHostname) &&
+                   settings.customBlacklist.length < MAX_BLACKLIST_FREE;
+    if (canAdd) {
+      addCurrentButton.style.display = 'flex';
+      currentSiteName.textContent = currentHostname;
+    } else {
+      addCurrentButton.style.display = 'none';
+    }
+  }
 }
 
 function render() {
@@ -39,6 +87,9 @@ function render() {
 
   // Blacklist
   renderBlacklist();
+
+  // Status
+  updateStatus();
 }
 
 function renderBlacklist() {
@@ -62,6 +113,7 @@ function setupListeners() {
   enabledCheckbox.addEventListener('change', async () => {
     settings.enabled = enabledCheckbox.checked;
     await saveSettings(settings);
+    updateStatus();
   });
 
   // Intensity
@@ -84,10 +136,23 @@ function setupListeners() {
         settings.enabledPresets = settings.enabledPresets.filter((p) => p !== preset);
       }
       await saveSettings(settings);
+      updateStatus();
     });
   });
 
-  // Add site
+  // Add current site
+  addCurrentButton.addEventListener('click', async () => {
+    if (currentHostname && settings.customBlacklist.length < MAX_BLACKLIST_FREE) {
+      if (!settings.customBlacklist.includes(currentHostname)) {
+        settings.customBlacklist.push(currentHostname);
+        await saveSettings(settings);
+        renderBlacklist();
+        updateStatus();
+      }
+    }
+  });
+
+  // Add site manually
   addSiteButton.addEventListener('click', async () => {
     const site = newSiteInput.value.trim().toLowerCase();
     if (site && settings.customBlacklist.length < MAX_BLACKLIST_FREE) {
@@ -97,6 +162,7 @@ function setupListeners() {
         settings.customBlacklist.push(cleanSite);
         await saveSettings(settings);
         renderBlacklist();
+        updateStatus();
         newSiteInput.value = '';
       }
     }
@@ -116,6 +182,7 @@ function setupListeners() {
       settings.customBlacklist.splice(index, 1);
       await saveSettings(settings);
       renderBlacklist();
+      updateStatus();
     }
   });
 }
