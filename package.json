@@ -12,6 +12,7 @@
     "zip:firefox": "wxt zip -b firefox"
   },
   "devDependencies": {
+    "sharp": "^0.34.5",
     "typescript": "^5.3.0",
     "wxt": "^0.20.11"
   }
