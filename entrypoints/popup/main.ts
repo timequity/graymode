@@ -1,5 +1,5 @@
-import { Settings, PresetKey, DEFAULT_SETTINGS } from '../presets';
-import { loadSettings, saveSettings } from '../storage';
+import { Settings, PresetKey, DEFAULT_SETTINGS } from '@/utils/presets';
+import { loadSettings, saveSettings } from '@/utils/storage';
 
 const MAX_BLACKLIST_FREE = 5;
 

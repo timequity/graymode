@@ -4,14 +4,15 @@
   "description": "Focus better by turning distracting sites grayscale",
   "type": "module",
   "scripts": {
-    "build": "node build.js",
-    "dev": "node build.js --watch",
-    "zip": "cd dist && zip -r ../graymode.zip ."
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.260",
-    "esbuild": "^0.24.0",
-    "sharp": "^0.34.5",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "wxt": "^0.20.11"
   }
 }

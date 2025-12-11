@@ -42,7 +42,7 @@ export const PRESETS = {
       'messenger.com',
     ],
   },
-};
+} as const;
 
 export type PresetKey = keyof typeof PRESETS;
 
